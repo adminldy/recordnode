@@ -7,7 +7,6 @@ class UserService extends Service {
             const result = app.mysql.get('user', { username })
             return result
         }catch(error) {
-            console.log(error)
             return null
         }
     }
@@ -23,6 +22,7 @@ class UserService extends Service {
     }
     async editUserInfo(params) {
         const { app } = this
+        console.log(`params`, params)
         try {
             const result = await app.mysql.update('user', {
                 ...params
@@ -40,7 +40,19 @@ class UserService extends Service {
         const QUERY_STR = 'id, username'
         let sql = `select ${QUERY_STR} from user limit ?,?`
         try {
+            // 根据分页查询数据库对应数据, 假如pageIndex = 2 ， pageSize = 3 则查询的第二页的数据，查的是索引为3到5的数据
             const result = await app.mysql.query(sql, [(pageIndex - 1) * pageSize, pageIndex * pageSize])
+            return result
+        }catch(error) {
+            console.log(error)
+            return null
+        }
+    }
+    async deleteUser(user_id) {
+        const { app } = this   
+        let sql = `delete from user where id = ${user_id}`
+        try {
+            const result = await app.mysql.query(sql)
             return result
         }catch(error) {
             console.log(error)

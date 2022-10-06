@@ -20,6 +20,13 @@ module.exports = appInfo => {
     domainWhiteList: [ '*' ], // 配置白名单
   };  
 
+  config.cors = {
+    origin: '*',//域名+端口 或者  *(全匹配)
+    credentials: true,
+    allowMethods: 'GET,HEAD,PUT,POST,DELETE,PATCH'
+  };
+
+
   config.jwt = {
     secret: 'Nick'
   }
@@ -43,7 +50,7 @@ module.exports = appInfo => {
     // 单数据库信息配置
     client: {
       // host
-      host: '43.138.77.216',
+      host: '127.0.0.1',
       // 端口号
       port: '3306',
       // 用户名

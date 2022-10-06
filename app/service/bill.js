@@ -1,5 +1,5 @@
+const moment = require('moment')
 const Service = require('egg').Service
-import moment from 'moment'
 class BillService extends Service {
     async add(params) {
         const { ctx, app } = this
@@ -11,15 +11,28 @@ class BillService extends Service {
             return null
         }
     }
-    async list(id, {pageIndex = 1, pageSize = 10, date, type_id}) {
+    async list(id, {pageIndex = 1, pageSize = 10, date = '', type_id = 0}) {
         const { ctx, app } = this
-        const QUERY_STR = 'id, pay_type, amount, date, type_id, type_name, remark'
-        const start = moment(date).startOf('month').format('YYYY-MM-DD')
-        const end = moment(date).endOf('month').format('YYYY-MM-DD')
-        let sql = `select ${QUERY_STR} from bill where user_id = ${id} and date between ${start} and ${end} and type_id = ${type_id} limit ?,?`
+        let startDate
+        let endDate
+        if(date === '') {
+            startDate = moment().startOf('month').format('YYYY-MM-DD hh:mm:ss'); 
+            endDate = moment().endOf('month').format('YYYY-MM-DD hh:mm:ss');
+        }else {
+            startDate = moment(date).startOf('month').format('YYYY-MM-DD hh:mm:ss'); 
+            endDate = moment(date).endOf('month').format('YYYY-MM-DD hh:mm:ss');
+        }
+        const QUERY_STR = 'id,pay_type,amount,date,type_id,type_name,remark'
+        let sql = `select ${QUERY_STR} from bill where date between '${startDate}' and '${endDate}' and user_id=${id} ${type_id ? `and type_id=${type_id}` : ''} limit ?,?`
+        console.log(`sql`, sql)
+        let totalPage = `select count(*) from bill`
         try {
             const result = await app.mysql.query(sql, [(pageIndex - 1) * pageSize, pageIndex * pageSize])
-            return result
+            let result2 = await app.mysql.query(totalPage)
+            return {
+                list: result,
+                totalPage: result2[0]['count(*)']
+            }
         }catch(error) {
             console.log(error)
             return null

@@ -44,10 +44,10 @@ class BillController extends Controller {
         }
     }
     // 获取订单列表
-    async list() {
+    async lists() {
         const { ctx, app } = this
         // 获取分页的数据， type_id
-        const { date = '', pageIndex = 1, pageSize = 10, type_id = 'all' } = ctx.query
+        const { date = '', pageIndex = 1, pageSize = 10, type_id = 0 } = ctx.query
         try {
             let user_id
             const token = ctx.request.header.authorization
@@ -55,10 +55,10 @@ class BillController extends Controller {
             if(!decode) return
             user_id = decode.id
             // 拿到当前用户的账单列表
-            const list = await ctx.service.bill.list(user_id, { date, pageIndex, pageSize, type_id })
+            const {list, totalPage} = await ctx.service.bill.list(user_id, { date, pageIndex, pageSize, type_id })
             // 过滤出月份和类型所对应的账单列表
             const listMap = list.reduce((curr, item) => {
-                const date = moment(Number(item.date)).format('YYYY-MM-DD')
+                const date = moment(item.date).format('YYYY-MM-DD')
                 if(curr && curr.length && curr.findIndex(item => item.date === date) > -1) {
                     const index = curr.findIndex(item => item.date === date)
                     curr[index].bills.push(item)
@@ -92,7 +92,7 @@ class BillController extends Controller {
                     return curr
                 }
                 return curr
-            })
+            }, 0)
             ctx.body = {
                 code: 200,
                 msg: '请求成功',
@@ -104,7 +104,12 @@ class BillController extends Controller {
                 }
             }
         }catch(error) {
-
+            console.log(error)
+            ctx.body = {
+                code: 500,
+                msg: '请求失败',
+                data: error
+            }
         }
     }
     // 获取订单详情

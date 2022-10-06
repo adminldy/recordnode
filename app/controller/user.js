@@ -1,14 +1,14 @@
 const Controller = require('egg').Controller;
 const defaultAvatar = 'http://s.yezgea02.com/1615973940679/WeChat77d6d2ac093e247c361f0b8a7aeb6c2a.png'
-
+const moment = require('moment')
 class UserController extends Controller {
     async register() {
         const { ctx } = this
-        const { username, password } = ctx.request.body; // 获取注册需要的参数
+        const { username, password, avatar, signature } = ctx.request.body; // 获取注册需要的参数
         if(!username || !password) {
             ctx.body = {
                 code: 500,
-                msg: '账号密码不能为空',
+                message: '账号密码不能为空',
                 data: null
             }
             return
@@ -19,28 +19,32 @@ class UserController extends Controller {
         if(userInfo && userInfo.id) {
             ctx.body = {
                 code: 500,
-                msg: '用户名已被注册， 请重新输入',
+                message: '用户名已被注册， 请重新输入',
                 data: null
             }
             return
         }
+        // 创建时间
+        const ctime = moment().format("YYYY-MM-DD HH:mm:ss")
+        // 调用service层注册函数， 操作数据库
         const result = await ctx.service.user.register({
             username,
             password,
-            signature: '世界和平。',
-            avatar: defaultAvatar
+            signature: signature ? signature : '世界和平。',
+            avatar: avatar ? avatar : defaultAvatar,
+            ctime
           });
           
           if (result) {
             ctx.body = {
               code: 200,
-              msg: '注册成功',
+              message: '注册成功',
               data: null
             }
           } else {
             ctx.body = {
               code: 500,
-              msg: '注册失败',
+              message: '注册失败',
               data: null
             }
           }
@@ -53,7 +57,7 @@ class UserController extends Controller {
         if(!userInfo || !userInfo.id) {
             ctx.body = {
                 code: 500,
-                msg: '账号不存在',
+                message: '账号不存在',
                 data: null
             }
             return
@@ -62,7 +66,7 @@ class UserController extends Controller {
         if(userInfo && userInfo.password !== password) {
             ctx.body = {
                 code: 500,
-                msg: '密码错误',
+                message: '密码错误',
                 data: null
             }
             return
@@ -111,14 +115,15 @@ class UserController extends Controller {
                 id: userInfo.id,
                 username: userInfo.username,
                 signature: userInfo.signature || '',
-                avatar: userInfo.avatar || defaultAvatar
+                avatar: userInfo.avatar || ''
             }
         }
     }
     // 编辑用户
     async editUserInfo() {
         const { ctx, app } = this
-        const { signature = '' } = ctx.request.body
+        // 只修改签名和头像
+        const { signature = '', avatar = '' } = ctx.request.body
         try {
             let user_id
             const token = ctx.request.header.authorization
@@ -126,24 +131,31 @@ class UserController extends Controller {
             if(!decode) return
             user_id = decode.id
             const userInfo = await ctx.service.user.getUserByName(decode.username)
-            const result = await ctx.service.user.editUserInfo(...userInfo, signature)
+            let newObj = {
+                ...userInfo,
+                signature, 
+                avatar
+            }
+            const result = await ctx.service.user.editUserInfo(newObj)
+            console.log(`result`, result)
             ctx.body = {
                 code: 200, 
                 msg: '请求成功',
                 data: {
                     id: user_id,
                     signature,
-                    username: userInfo.username
+                    username: userInfo.username,
+                    avatar
                 }
             }
         }catch(error) {
-            
+            console.log(`error`, error)
         }
     }
     // 获取用户列表
     async getUserList() {
         const { ctx } = this
-        const { pageIndex = 1, pageSize = 10} = ctx.request.query
+        const { pageIndex = 1, pageSize = 3} = ctx.request.query
         try {
             let list =  await ctx.service.user.getUserList(pageIndex, pageSize)
             ctx.body = {
@@ -156,6 +168,25 @@ class UserController extends Controller {
                 code: 500,
                 msg: '请求失败',
                 data: null
+            }
+        }
+    }
+    // 删除用户
+    async deleteUser() {
+        const { ctx, app } = this
+        const { id } = ctx.request.body
+        try {
+            const result = await ctx.service.user.deleteUser(id) 
+            ctx.body = {
+                code: 200,
+                msg: '请求成功',
+                data: result
+            }
+        }catch(error) {
+            ctx.body = {
+                code: 500,
+                msg: '业务异常',
+                data: error
             }
         }
     }
