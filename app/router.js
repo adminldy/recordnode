@@ -20,6 +20,7 @@ module.exports = app => {
   router.post('/api/bill/add', _jwt, controller.bill.add)
   router.get('/api/bill/detail', _jwt, controller.bill.detail); // 获取详情
   router.post('/api/bill/update', _jwt, controller.bill.update); // 账单更新
+  router.post('/api/bill/delete', _jwt, controller.bill.delete); // 账单删除
   router.get('/api/bill/data', _jwt, controller.bill.data); // 获取数据
   router.post('/api/user/editUserinfo', _jwt, controller.user.editUserInfo)
   router.post('/api/user/deleteUser', _jwt, controller.user.deleteUser)

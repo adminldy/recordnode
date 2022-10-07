@@ -4,8 +4,18 @@ class BillService extends Service {
     async add(params) {
         const { ctx, app } = this
         try {
-            const result = await app.mysql.insert('bill', params)
-            return result
+            if(!params.id) {
+                const result = await app.mysql.insert('bill', params)
+                return result
+            }else {
+                let result = await app.mysql.update('bill', {
+                    ...params
+                }, {
+                    id: params.id,
+                    user_id: params.user_id
+                })
+                return result
+            }
         }catch(error) {
             console.log(error)
             return null
@@ -65,7 +75,7 @@ class BillService extends Service {
     async delete(id, user_id) {
         const { ctx, app } = this
         try {
-            let result = app.mysql.delete({
+            let result = app.mysql.delete('bill', {
                 id,
                 user_id
             })

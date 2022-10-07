@@ -6,7 +6,7 @@ class BillController extends Controller {
     async add() {
         const { ctx, app } = this
         // 获取请求中携带的参数
-        const { amount, type_id, type_name, date, pay_type, remark = '' } = ctx.request.body
+        const { amount, type_id, type_name, date, pay_type, remark = '', id = 0 } = ctx.request.body
         if(!amount || !type_id || !type_name || !date || !pay_type) {
             ctx.body = {
                 code: 400,
@@ -28,7 +28,8 @@ class BillController extends Controller {
                 date,
                 pay_type,
                 remark,
-                user_id
+                user_id,
+                id
             })
             ctx.body = {
                 code: 200,
