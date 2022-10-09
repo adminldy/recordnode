@@ -34,9 +34,9 @@ jobs:
       - name: Restart service
         uses: appleboy/ssh-action@master 
         with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
+          hosts: ${{ secrets.REMOTE_HOST }}
+          user: ${{ secrets.REMOTE_USER }}
+          private_key: ${{ secrets.SERVER_SSH_KEY }}
           # 执行脚本
           script: |
             cd /workspace/recordnode
