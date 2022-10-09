@@ -6,10 +6,21 @@ on: # 此CI/CD触发时的事件
     branches:
       - master
 
+# 变量
+env: 
+    SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+    SERVER_HOST: ${{ secrets.REMOTE_HOST }}
+    REMOTE_USER: ${{ secrets.REMOTE_USER }}
+
 # 一个 CI/CD 的工作流有许多 jobs 组成，比如最典型的 job 是 lint，test，build。
 jobs: 
   build: # 构建job
     runs-on: ubuntu-latest # 跑workflow的服务器系统
+    strategy:
+      matrix:
+        # 配置所需node版本
+        node-version: [16.x]
+
     steps: # job的一系列动作
       # 切换分支获取源码
       - name: Checkout # step的名称，将会在 github action 的控制台中显示
@@ -20,27 +31,39 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      # 运行命令，npm install && npm run build
-      - name: npm install and build
-        run: |
-          npm install
-          npm run build
-        env:
-          CI: true
+      # # 运行命令，npm install && npm run build
+      # - name: npm install and start
+      #   run: |
+      #     npm install
+      #     npm run start
+      #   env:
+      #     CI: true
       # 部署到腾讯云服务器
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@v2.0.7
         env:
             # 本地.ssh文件下的私钥id_rsa，存在secrets的TOKEN中
-            SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }} 
+            SSH_PRIVATE_KEY: ${{ env.SERVER_SSH_KEY }} 
             # 复制操作的参数。"-avzr --delete"意味部署时清空服务器目标目录下的文件
             ARGS: "-avzr --delete" 
             # 源目录，相对于$GITHUB_WORKSPACE根目录的路径
-            SOURCE: "dist/" 
+            # SOURCE: "dist/" 
             # 服务器域名
-            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+            REMOTE_HOST: ${{ env.REMOTE_HOST }}
             # 腾讯云默认用户名为root
             REMOTE_USER: "root" 
             # 目标目录
-            TARGET: "/usr/share/nginx/html" 
+            TARGET: "/workspace/recordnode" 
 
+       - name: Restart service
+        uses: appleboy/ssh-action@master 
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SERVER_PRIVATE_KEY }}
+          # 执行脚本
+          script: |
+            cd /workspace/recordnode
+            npm install 
+            npm run stop
+            npm run start
