@@ -16,19 +16,19 @@ jobs:
     steps:
 
       # 检出仓库副本
-      - uses: actions/checkout@v3
+      # - uses: actions/checkout@v3
 
-      # 推送资源
-      - name: Deploy
-        uses: easingthemes/ssh-deploy@v2.2.11
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: '-avz --delete'
-          # SOURCE: 'backend/'
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }} 
-          TARGET: /workspace/recordnode
-          EXCLUDE: '/node_modules, config/config_env_local.js, /config/config_env_prod.js, /app/public/, /logs' # 排除文件，否则会被删除
+      # # 推送资源
+      # - name: Deploy
+      #   uses: easingthemes/ssh-deploy@v2.2.11
+      #   env:
+      #     SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+      #     ARGS: '-avz --delete'
+      #     # SOURCE: 'backend/'
+      #     REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+      #     REMOTE_USER: ${{ secrets.REMOTE_USER }} 
+      #     TARGET: /workspace/recordnode
+      #     EXCLUDE: '/node_modules, config/config_env_local.js, /config/config_env_prod.js, /app/public/, /logs' # 排除文件，否则会被删除
 
       # 重启服务
       - name: Restart service
