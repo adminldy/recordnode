@@ -28,3 +28,4 @@ jobs:
         private_key: ${{ secrets.SERVER_SSH_KEY }}
         commands: sh /test.sh
 
+ 
