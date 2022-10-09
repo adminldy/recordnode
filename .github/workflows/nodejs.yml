@@ -6,12 +6,6 @@ on: # 此CI/CD触发时的事件
     branches:
       - master
 
-# 变量
-env: 
-    SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
-    SERVER_HOST: ${{ secrets.REMOTE_HOST }}
-    REMOTE_USER: ${{ secrets.REMOTE_USER }}
-
 # 一个 CI/CD 的工作流有许多 jobs 组成，比如最典型的 job 是 lint，test，build。
 jobs: 
   build-backend:
@@ -38,7 +32,7 @@ jobs:
 
       # 重启服务
       - name: Restart service
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@master 
         with:
           host: ${{ secrets.REMOTE_HOST }}
           username: ${{ secrets.REMOTE_USER }}
