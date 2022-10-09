@@ -31,8 +31,8 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           ARGS: '-avz --delete'
           # SOURCE: 'backend/'
-          REMOTE_HOST: ${{ env.REMOTE_HOST }}
-          REMOTE_USER: ${{ env.REMOTE_USER }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: /workspace/recordnode
           EXCLUDE: '/node_modules, config/config_env_local.js, /config/config_env_prod.js, /app/public/, /logs' # 排除文件，否则会被删除
 
